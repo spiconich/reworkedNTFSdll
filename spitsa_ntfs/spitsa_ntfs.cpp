@@ -41,7 +41,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
         dllCheckVolume(checkResult, checkPointer, checkReading, fileName, letters[letterNum], sysType);
         if (checkResult == true)
         {
-            std::cout << "       " << fileName << letters[letterNum] << "                          exist " << std::endl;
+            std::cout << "       " << fileName << letters[letterNum] << "           exist " << std::endl;
             foundVolumes++;
             if (checkPointer == false)
             {
@@ -56,6 +56,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
                 else
                 {
                     //TODO: SHOW SYS TYPE! (sysType string) 
+
                 }
             }
         }

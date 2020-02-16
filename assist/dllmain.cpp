@@ -79,6 +79,7 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
             if (readResult && bytesRead == bytesToRead)
             {
                 *readRez = true;
+                std::cout << "       "<< byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str();
             };
         };
     }
