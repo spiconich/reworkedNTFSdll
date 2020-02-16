@@ -1,9 +1,8 @@
 ﻿// dllmain.cpp : Определяет точку входа для приложения DLL.
 #include "pch.h"
 #include <iostream>
-#include "Header.h" // TODO : peremestit' strukturu.
 #include <string>
-
+#include "dllHeader.h"
 
 BOOL APIENTRY DllMain( HMODULE hModule,
                        DWORD  ul_reason_for_call,
@@ -20,13 +19,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     }
     return TRUE;
 }
-#pragma pack(push,1)
-typedef struct
-{
-    BYTE Padding1[3];
-    BYTE OEM_Name[8];
-} NTFS_BootRecord;
-#pragma pack(pop)
+
 
 std::string byte2ch(BYTE* data, int size)
 {
@@ -54,8 +47,9 @@ extern "C" __declspec(dllexport) void CheckPhysDrives(bool* rez,int DriveNum,std
     {
         *rez = false;      
     }
+    CloseHandle(fileHandle);
 }
-extern "C" __declspec(dllexport) void CheckVolume(bool* rez,std::string fileName,std::string letter)
+extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bool* readRez, std::string fileName,std::string letter,std::string* dllSysType)
 {
     std::string fullPath = fileName + letter+":";
     HANDLE fileHandle = CreateFileA(
@@ -69,11 +63,31 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,std::string fileName
     if (fileHandle != INVALID_HANDLE_VALUE)
     {
         *rez = true;
+        ULONGLONG startOffset = 0;
+        BYTE buffer[512];
+        DWORD bytesToRead = 512;
+        DWORD bytesRead;
+        LARGE_INTEGER sectorOffset;
+        sectorOffset.QuadPart = 0;
+        NTFS_BootRecord* pNTFS_BootRecord = reinterpret_cast <NTFS_BootRecord*> (buffer);
+        // Задаем позицию
+        unsigned long currentPosition = SetFilePointer(fileHandle, sectorOffset.LowPart, NULL, FILE_BEGIN);
+        if (currentPosition == sectorOffset.LowPart)
+        {
+            *pointerRez = true;
+            bool readResult = ReadFile(fileHandle, buffer, bytesToRead, &bytesRead, NULL);
+            if (readResult && bytesRead == bytesToRead)
+            {
+                *readRez = true;
+            };
+        };
     }
     else
     {
         *rez = false;
     }
+    CloseHandle(fileHandle);
+
 }
 
 
