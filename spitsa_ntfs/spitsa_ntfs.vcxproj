@@ -149,6 +149,9 @@
   <ItemGroup>
     <ClCompile Include="spitsa_ntfs.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="diffDef.h" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>
