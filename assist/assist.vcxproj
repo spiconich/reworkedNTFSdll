@@ -151,8 +151,8 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClInclude Include="dllHeader.h" />
     <ClInclude Include="framework.h" />
-    <ClInclude Include="Header.h" />
     <ClInclude Include="pch.h" />
   </ItemGroup>
   <ItemGroup>
