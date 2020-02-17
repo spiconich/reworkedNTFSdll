@@ -106,7 +106,7 @@ extern "C" __declspec(dllexport) void CheckPhysDrives(bool* rez,int DriveNum,std
     }
     CloseHandle(fileHandle);
 }
-extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bool* readRez, std::string fileName,std::string letter,std::string* dllSysType)
+extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bool* readRez, bool readfullINFO,std::string fileName,std::string letter,std::string* dllSysType)
 {
     std::string fullPath = fileName + letter+":";
     HANDLE fileHandle = CreateFileA(
