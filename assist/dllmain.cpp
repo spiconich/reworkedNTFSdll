@@ -137,6 +137,10 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
             {
                 *readRez = true;
                 *dllSysType = byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str();
+                if (readfullINFO == true )
+                {
+                   //TODO DO THERE SMTH
+                }
             };
         };
     }

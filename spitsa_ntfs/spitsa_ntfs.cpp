@@ -14,6 +14,7 @@ void finalOutput(checkVol dllCheckVolume,std::string volumeId)
     bool ifNeedFullINFO = true;
     dllCheckVolume(checkResult, checkPointer, checkReading, ifNeedFullINFO, fileName, volumeId, sysType);
     //TODO: get and show more INFO
+
 }
 
 int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
@@ -40,6 +41,7 @@ int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
 
 int calcAndShowAllVolumes(checkVol dllCheckVolume)
 {
+    BYTE buffer[512];
     std::string fileName = "\\\\.\\";
     const int alphCount = 26;
     int foundVolumes = 0;
