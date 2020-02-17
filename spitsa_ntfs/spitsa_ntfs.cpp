@@ -53,11 +53,6 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
                 {
                     std::cout << "       GOT PROBLEMS WITH READING ITS SYS TYPE (Reading info PROBLEM) " << std::endl;
                 }
-                else
-                {
-                    //TODO: SHOW SYS TYPE! (sysType string) 
-
-                }
             }
         }
     };
@@ -75,6 +70,7 @@ int main()
     }
     else
     {
+        std::cout << "       ###########   MAIN MENU  ###########" << std::endl;
         checkPhys dllCheckPhysDrives = (checkPhys)GetProcAddress(hLib, "CheckPhysDrives");
         if (!dllCheckPhysDrives)
         {
@@ -103,6 +99,36 @@ int main()
                     }
                     else
                     {   //TODO: GET MORE INFO?
+                        std::cout << "\n" << "   Enter the volume you are interested in (ONLY NTFS able atm) :  ";
+                        std::string choosenVolume = "";
+                        std::cin >> choosenVolume;
+                        std::cout << choosenVolume << std::endl;
+                        checkIsNTFS dllcheckIsNTFS = (checkIsNTFS)GetProcAddress(hLib, "checkIsNTFS");
+                        if (!dllcheckIsNTFS)
+                        {
+                            std::cout << "Error while getting func address (checkIsNTFS)" << std::endl; //TODO : ERROR COLOR ??
+                        }
+                        else
+                        {
+                            bool checkResult = false;
+                            bool checkPointer = false;
+                            bool checkReading = false;
+                            bool IsNTFSResult = false;
+                            dllcheckIsNTFS(checkResult, checkPointer, checkReading, IsNTFSResult, choosenVolume);
+                            int nTry = 0;
+                            while (nTry < 3)
+                            {  if (checkResult == true && checkPointer == true && checkReading == true && IsNTFSResult == true)
+                               {
+                                  nTry = 3; // Цикл не нужен
+                                  std::cout << "   All checks done , System is NTFS, searching more info" << std::endl;
+                               }
+                            else
+                            {
+                                nTry++;
+                                //TODO: say which one error exist
+                            }                     
+                            }
+                        }
                     }
                 }
             }
