@@ -41,7 +41,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
         dllCheckVolume(checkResult, checkPointer, checkReading, fileName, letters[letterNum], sysType);
         if (checkResult == true)
         {
-            std::cout << "       " << fileName << letters[letterNum] << "           exist " << std::endl;
+            std::cout << "       " << fileName << letters[letterNum] << "           ";
             foundVolumes++;
             if (checkPointer == false)
             {
@@ -53,6 +53,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
                 {
                     std::cout << "       GOT PROBLEMS WITH READING ITS SYS TYPE (Reading info PROBLEM) " << std::endl;
                 }
+                std::cout << sysType << std::endl;
             }
         }
     };
@@ -94,39 +95,75 @@ int main()
                 {   
                     if (calcAndShowAllVolumes(dllCheckVolume) == 0)
                     {
-                        std::cout << "\n" << "  No drives exist, stopping programm..." << std::endl;
+                        std::cout << "\n" << "  No Volumes exist, stopping programm..." << std::endl;
                         std::cin;  //TODO : ERROR COLOR ??
                     }
                     else
-                    {   //TODO: GET MORE INFO?
-                        std::cout << "\n" << "   Enter the volume you are interested in (ONLY NTFS able atm) :  ";
-                        std::string choosenVolume = "";
-                        std::cin >> choosenVolume;
-                        std::cout << choosenVolume << std::endl;
-                        checkIsNTFS dllcheckIsNTFS = (checkIsNTFS)GetProcAddress(hLib, "checkIsNTFS");
+                    {   checkIsNTFS dllcheckIsNTFS = (checkIsNTFS)GetProcAddress(hLib, "checkIsNTFS");
                         if (!dllcheckIsNTFS)
                         {
                             std::cout << "Error while getting func address (checkIsNTFS)" << std::endl; //TODO : ERROR COLOR ??
                         }
                         else
                         {
-                            bool checkResult = false;
-                            bool checkPointer = false;
-                            bool checkReading = false;
-                            bool IsNTFSResult = false;
-                            dllcheckIsNTFS(checkResult, checkPointer, checkReading, IsNTFSResult, choosenVolume);
+                            std::cout << "\n" << "   Enter the volume you are interested in (ONLY NTFS able atm) :  ";
+                            bool checkResult;
+                            bool checkPointer;
+                            bool checkReading;;
+                            bool IsNTFSResult;
                             int nTry = 0;
-                            while (nTry < 3)
-                            {  if (checkResult == true && checkPointer == true && checkReading == true && IsNTFSResult == true)
+                            const int maxTry = 3;
+                            std::string choosenVolume = "";
+                            while (nTry < maxTry)
+                            { 
+                                std::cin >> choosenVolume;
+                                checkResult = false;
+                                checkPointer = false;
+                                checkReading = false;
+                                IsNTFSResult = false;
+                                dllcheckIsNTFS(checkResult, checkPointer, checkReading, IsNTFSResult, choosenVolume);
+                                if (checkResult == true && checkPointer == true && checkReading == true && IsNTFSResult == true)
                                {
-                                  nTry = 3; // Цикл не нужен
-                                  std::cout << "   All checks done , System is NTFS, searching more info" << std::endl;
+                                  nTry = 3; // Exiting with msg
+                                  std::cout << "   All checks done , System is NTFS, searching more info..." << std::endl;
+                                  //TODO: more info.
                                }
-                            else
-                            {
+                                else
+                               {   
                                 nTry++;
-                                //TODO: say which one error exist
-                            }                     
+                                if (checkResult == false)
+                                {
+                                    std::cout << "   Error: this path not found (cant open file). Check your input." << std::endl;
+                                }
+                                else
+                                {
+                                    if (checkPointer == false)
+                                    {
+                                        std::cout << "   File: opened +" << std::endl;
+                                        std::cout << "   Error: problems with setting pointer" << std::endl;
+                                    }
+                                    else
+                                    {
+                                        if (checkReading == false)
+                                        {
+                                            std::cout << "   File: opened +" << std::endl;
+                                            std::cout << "   Pointer: set +" << std::endl;
+                                            std::cout << "   Error: problems with reading file" << std::endl;
+                                        }
+                                        else
+                                        {
+                                            std::cout << "   File: opened +" << std::endl;
+                                            std::cout << "   Pointer: set +" << std::endl;
+                                            std::cout << "   File: read +" << std::endl;
+                                            std::cout << "   Error: it's not NTFS (only NTFS supported atm).";
+                                        }
+                                    }
+                                }
+                                
+                                std::cout << " You have " << maxTry - nTry << " more try..." << std::endl;
+                                std::cout << "\n" << "   Enter the volume you are interested in (ONLY NTFS able atm) :  ";
+                                }    
+
                             }
                         }
                     }
