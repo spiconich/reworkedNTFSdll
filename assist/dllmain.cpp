@@ -1,5 +1,4 @@
-﻿// dllmain.cpp : Определяет точку входа для приложения DLL.
-#include "pch.h"
+﻿#include "pch.h"
 #include <iostream>
 #include <string>
 #include "dllHeader.h"
@@ -137,7 +136,7 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
             if (readResult && bytesRead == bytesToRead)
             {
                 *readRez = true;
-                std::cout << "       "<< byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str();
+                *dllSysType = byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str();
             };
         };
     }
