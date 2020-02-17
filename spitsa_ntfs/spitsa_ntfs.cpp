@@ -3,6 +3,18 @@
 #include <string>
 #include "diffDef.h"
 
+void finalOutput(checkVol dllCheckVolume,std::string volumeId)
+{
+    std::string sysType = "";
+    std::string fileName = "\\\\.\\";
+    std::string fullPath = fileName + volumeId + ":";
+    bool checkResult = false;
+    bool checkPointer = false;
+    bool checkReading = false;
+    bool ifNeedFullINFO = true;
+    dllCheckVolume(checkResult, checkPointer, checkReading, ifNeedFullINFO, fileName, volumeId, sysType);
+    //TODO: get and show more INFO
+}
 
 int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
 {
@@ -38,7 +50,8 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
         bool checkPointer = false;
         bool checkReading = false;
         std::string sysType = "";
-        dllCheckVolume(checkResult, checkPointer, checkReading, fileName, letters[letterNum], sysType);
+        bool ifNeedFullINFO = false;
+        dllCheckVolume(checkResult, checkPointer, checkReading, ifNeedFullINFO, fileName, letters[letterNum], sysType);
         if (checkResult == true)
         {
             std::cout << "       " << fileName << letters[letterNum] << "           ";
@@ -126,44 +139,50 @@ int main()
                                {
                                   nTry = 3; // Exiting with msg
                                   std::cout << "   All checks done , System is NTFS, searching more info..." << std::endl;
-                                  //TODO: more info.
+                                  finalOutput(dllCheckVolume,choosenVolume);
                                }
                                 else
-                               {   
-                                nTry++;
-                                if (checkResult == false)
                                 {
-                                    std::cout << "   Error: this path not found (cant open file). Check your input." << std::endl;
-                                }
-                                else
-                                {
-                                    if (checkPointer == false)
+                                    nTry++;
+                                    if (checkResult == false)
                                     {
-                                        std::cout << "   File: opened +" << std::endl;
-                                        std::cout << "   Error: problems with setting pointer" << std::endl;
+                                        std::cout << "   Error: this path not found (cant open file). Check your input." << std::endl;
                                     }
                                     else
                                     {
-                                        if (checkReading == false)
+                                        if (checkPointer == false)
                                         {
                                             std::cout << "   File: opened +" << std::endl;
-                                            std::cout << "   Pointer: set +" << std::endl;
-                                            std::cout << "   Error: problems with reading file" << std::endl;
+                                            std::cout << "   Error: problems with setting pointer" << std::endl;
                                         }
                                         else
                                         {
-                                            std::cout << "   File: opened +" << std::endl;
-                                            std::cout << "   Pointer: set +" << std::endl;
-                                            std::cout << "   File: read +" << std::endl;
-                                            std::cout << "   Error: it's not NTFS (only NTFS supported atm).";
+                                            if (checkReading == false)
+                                            {
+                                                std::cout << "   File: opened +" << std::endl;
+                                                std::cout << "   Pointer: set +" << std::endl;
+                                                std::cout << "   Error: problems with reading file" << std::endl;
+                                            }
+                                            else
+                                            {
+                                                std::cout << "   File: opened +" << std::endl;
+                                                std::cout << "   Pointer: set +" << std::endl;
+                                                std::cout << "   File: read +" << std::endl;
+                                                std::cout << "   Error: it's not NTFS (only NTFS supported atm)." << std::endl;
+                                            }
                                         }
                                     }
-                                }
-                                
-                                std::cout << " You have " << maxTry - nTry << " more try..." << std::endl;
-                                std::cout << "\n" << "   Enter the volume you are interested in (ONLY NTFS able atm) :  ";
-                                }    
+                                    if (maxTry - nTry > 0)
+                                    {
+                                        std::cout << " You have " << maxTry - nTry << " more try..." << std::endl;
+                                        std::cout << "\n" << "   Enter the volume you are interested in :  ";
+                                    }
+                                    else
+                                    {
+                                        std::cout << "   You have no more try...stopping programm" << std::endl;
 
+                                    }
+                                }
                             }
                         }
                     }
