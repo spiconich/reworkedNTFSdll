@@ -19,6 +19,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
+
 std::string byte2ch(BYTE* data, int size)
 {
     return std::string((char*)data, size);
@@ -42,6 +43,10 @@ bool checkNTFSstring(std::string OEM)
 }
 extern "C" __declspec(dllexport) void checkIsNTFS(bool* rez, bool* pointerRez, bool* readRez,bool* ntfsRez, std::string volumeLetter)
 {
+    *rez = false;
+    *pointerRez = false;
+    *readRez = false;
+    *ntfsRez = false;
     std::string fileName = "\\\\.\\";
     std::string fullPath = fileName + volumeLetter + ":";
     HANDLE fileHandle = CreateFileA(
@@ -62,7 +67,6 @@ extern "C" __declspec(dllexport) void checkIsNTFS(bool* rez, bool* pointerRez, b
         LARGE_INTEGER sectorOffset;
         sectorOffset.QuadPart = 0;
         NTFS_BootRecord* pNTFS_BootRecord = reinterpret_cast <NTFS_BootRecord*> (buffer);
-        // Задаем позицию
         unsigned long currentPosition = SetFilePointer(fileHandle, sectorOffset.LowPart, NULL, FILE_BEGIN);
         if (currentPosition == sectorOffset.LowPart)
         {
@@ -72,7 +76,6 @@ extern "C" __declspec(dllexport) void checkIsNTFS(bool* rez, bool* pointerRez, b
             {
                 *readRez = true;
                 *ntfsRez = checkNTFSstring(byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str());
-
             };
         };
     }
@@ -106,7 +109,7 @@ extern "C" __declspec(dllexport) void CheckPhysDrives(bool* rez,int DriveNum,std
     }
     CloseHandle(fileHandle);
 }
-extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bool* readRez, bool readfullINFO,std::string fileName,std::string letter,std::string* dllSysType)
+extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bool* readRez,std::string fileName,std::string letter,std::string* dllSysType)
 {
     std::string fullPath = fileName + letter+":";
     HANDLE fileHandle = CreateFileA(
@@ -121,14 +124,13 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
     {
         *rez = true;
         ULONGLONG startOffset = 0;
-        BYTE buffer[512];
+        static BYTE buffer[512];
         DWORD bytesToRead = 512;
         DWORD bytesRead;
         LARGE_INTEGER sectorOffset;
         sectorOffset.QuadPart = 0;
-        NTFS_BootRecord* pNTFS_BootRecord = reinterpret_cast <NTFS_BootRecord*> (buffer);
-        // Задаем позицию
-        unsigned long currentPosition = SetFilePointer(fileHandle, sectorOffset.LowPart, NULL, FILE_BEGIN);
+        NTFS_BootRecord *pNTFS_BootRecord = reinterpret_cast <NTFS_BootRecord*> (buffer);
+        unsigned long currentPosition = SetFilePointer(fileHandle, sectorOffset.LowPart, &sectorOffset.HighPart, FILE_BEGIN);
         if (currentPosition == sectorOffset.LowPart)
         {
             *pointerRez = true;
@@ -137,10 +139,6 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
             {
                 *readRez = true;
                 *dllSysType = byte2ch(pNTFS_BootRecord->OEM_Name, 8).c_str();
-                if (readfullINFO == true )
-                {
-                   //TODO DO THERE SMTH
-                }
             };
         };
     }
@@ -152,4 +150,18 @@ extern "C" __declspec(dllexport) void CheckVolume(bool* rez,bool* pointerRez ,bo
 
 }
 
-
+extern "C" __declspec(dllexport) void noMoreChecks(std::string fullPath, NTFS_BootRecord* strucToReturn)
+{
+    HANDLE fileHandle = CreateFileA(fullPath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+    ULONGLONG startOffset = 0;
+    BYTE buffer[512];
+    memset(buffer, 0, 512);
+    DWORD bytesToRead = 512;
+    DWORD bytesRead;
+    LARGE_INTEGER sectorOffset;
+    sectorOffset.QuadPart = 0;
+    unsigned long currentPosition = SetFilePointer(fileHandle, sectorOffset.LowPart, NULL, FILE_BEGIN);
+    bool stopSpamTrash = ReadFile(fileHandle, buffer, bytesToRead, &bytesRead, NULL);
+    *strucToReturn = *reinterpret_cast<NTFS_BootRecord*>(buffer);
+    CloseHandle(fileHandle);
+}
