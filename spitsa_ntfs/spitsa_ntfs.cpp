@@ -3,7 +3,12 @@
 #include <string>
 #include "diffDef.h"
 
-
+void showMe()
+{
+    std::cout <<"\n"<<"          Press ctrl+c to exit" << std::endl;
+    std::string x;
+    std::cin >> x;
+    }
 void finalNTFSOutput(NTFS_BootRecordMain ntfsStruc)
 {
     std::cout << "   File system type (0x03) : " << ntfsStruc.OEM_Name << std::endl;
@@ -21,6 +26,7 @@ void finalNTFSOutput(NTFS_BootRecordMain ntfsStruc)
     WORD toShowclusterPerIndexRecord = ntfsStruc.clusterPerIndexRecord;
     std::cout << "   Clusters per Index Record  (0x44): " << toShowclusterPerIndexRecord << std::endl;
     std::cout << "   Volume serial number  (0x48): " << ntfsStruc.volumeID << std::endl;
+    showMe();
 }
 
 int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
@@ -32,7 +38,6 @@ int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
     for (int DriveNum = 0; DriveNum < 30; DriveNum++)
     {
         checkResult = false;
-        std::string sysType="";
         dllCheckPhysDrives(checkResult, DriveNum, fileName);
         if (checkResult == true)
         {
@@ -58,7 +63,6 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
         bool checkPointer = false;
         bool checkReading = false;
         std::string sysType = "";
-        bool ifNeedFullINFO = false;
         dllCheckVolume(checkResult, checkPointer, checkReading,  fileName, letters[letterNum], sysType);
         if (checkResult == true)
         {
@@ -74,7 +78,10 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
                 {
                     std::cout << "       GOT PROBLEMS WITH READING ITS SYS TYPE (Reading info PROBLEM) " << std::endl;
                 }
-                std::cout << sysType << std::endl;
+                else
+                {
+                    std::cout << sysType << std::endl;
+                }
             }
         }
     };
@@ -89,6 +96,7 @@ int main()
     if (hLib == NULL)
     {
         std::cout << "No able to attach dll !" << std::endl;
+        showMe();
     }
     else
     {
@@ -97,13 +105,14 @@ int main()
         if (!dllCheckPhysDrives)
         {
             std::cout << "Error while getting func address (Phys)" << std::endl; 
+            showMe();
         }
         else
         {
             if (calcAndShowAlldrives(dllCheckPhysDrives) == 0)
             {
                 std::cout << "\n" << "  No drives exist, stopping programm..." << std::endl;
-                std::cin;  
+                showMe();
             }
             else
             {
@@ -111,19 +120,21 @@ int main()
                 if (!dllCheckVolume)
                 {
                     std::cout << "Error while getting func address (Volumes)"<< std::endl;
+                    showMe();
                 }
                 else
                 {   
                     if (calcAndShowAllVolumes(dllCheckVolume) == 0)
                     {
                         std::cout << "\n" << "  No Volumes exist, stopping programm..." << std::endl;
-                        std::cin;
+                        showMe();
                     }
                     else
                     {   checkIsNTFS dllcheckIsNTFS = (checkIsNTFS)GetProcAddress(hLib, "checkIsNTFS");
                         if (!dllcheckIsNTFS)
                         {
                             std::cout << "Error while getting func address (checkIsNTFS)" << std::endl; 
+                            showMe();
                         }
                         else
                         {
@@ -148,6 +159,7 @@ int main()
                                   if (!dllNTFSstruc)
                                   {
                                       std::cout << "Error while getting func address noMoreChecks" << std::endl;
+                                      showMe();
                                   }
                                   else
                                   {
@@ -197,7 +209,7 @@ int main()
                                     else
                                     {
                                         std::cout << "   You have no more try...stopping programm" << std::endl;
-
+                                        showMe();
                                     }
                                 }
                             }
