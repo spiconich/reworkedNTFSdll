@@ -98,7 +98,6 @@ extern "C" __declspec(dllexport) void CheckPhysDrives(bool* rez,int DriveNum,std
         OPEN_EXISTING,
         FILE_ATTRIBUTE_NORMAL,
         NULL);
-
     if (fileHandle != INVALID_HANDLE_VALUE)
     {
         *rez = true;
