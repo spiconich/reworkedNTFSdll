@@ -3,18 +3,24 @@
 #include <string>
 #include "diffDef.h"
 
-void finalOutput(checkVol dllCheckVolume,std::string volumeId)
-{
-    std::string sysType = "";
-    std::string fileName = "\\\\.\\";
-    std::string fullPath = fileName + volumeId + ":";
-    bool checkResult = false;
-    bool checkPointer = false;
-    bool checkReading = false;
-    bool ifNeedFullINFO = true;
-    dllCheckVolume(checkResult, checkPointer, checkReading, ifNeedFullINFO, fileName, volumeId, sysType);
-    //TODO: get and show more INFO
 
+void finalNTFSOutput(NTFS_BootRecordMain ntfsStruc)
+{
+    std::cout << "   File system type (0x03) : " << ntfsStruc.OEM_Name << std::endl;
+    std::cout << "   Bytes per sector (0x0B) : " << ntfsStruc.bytesPerSector << std::endl;
+    WORD toShowsectorPerCluster = ntfsStruc.sectorPerCluster;
+    std::cout << "   Sectors per cluster (0x0D) : " << toShowsectorPerCluster << std::endl;
+    WORD toShowmediaDescriptor = ntfsStruc.mediaDescriptor;
+    std::cout << "   Media descriptor (0x15) : " << toShowmediaDescriptor << std::endl;
+    std::cout << "   Sectors per track (0x18) : " << ntfsStruc.sectorPerTrack << std::endl;
+    std::cout << "   Number of heads (0x1A) : " << ntfsStruc.numOfHeaders << std::endl;
+    std::cout << "   Number of sectors in the volume (0x28) : " << ntfsStruc.sectorsInTheVolume << std::endl;
+    std::cout << "   LCN of VCN 0 of the $MFT (0x30) : " << ntfsStruc.lcnOfMFT << std::endl;
+    std::cout << "   LCN of VCN 0 of the $MFTMirr (0x38) : " << ntfsStruc.lcnOfSMFTMirr << std::endl;
+    std::cout << "   Clusters per MFT Record (0x40) : " << ntfsStruc.clusterPerMftRecord << std::endl;
+    WORD toShowclusterPerIndexRecord = ntfsStruc.clusterPerIndexRecord;
+    std::cout << "   Clusters per Index Record  (0x44): " << toShowclusterPerIndexRecord << std::endl;
+    std::cout << "   Volume serial number  (0x48): " << ntfsStruc.volumeID << std::endl;
 }
 
 int calcAndShowAlldrives(checkPhys dllCheckPhysDrives)
@@ -53,7 +59,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
         bool checkReading = false;
         std::string sysType = "";
         bool ifNeedFullINFO = false;
-        dllCheckVolume(checkResult, checkPointer, checkReading, ifNeedFullINFO, fileName, letters[letterNum], sysType);
+        dllCheckVolume(checkResult, checkPointer, checkReading,  fileName, letters[letterNum], sysType);
         if (checkResult == true)
         {
             std::cout << "       " << fileName << letters[letterNum] << "           ";
@@ -78,7 +84,7 @@ int calcAndShowAllVolumes(checkVol dllCheckVolume)
 }
 
 int main()
-{   
+{
     HMODULE hLib = LoadLibrary(L"assist.dll");
     if (hLib == NULL)
     {
@@ -90,34 +96,34 @@ int main()
         checkPhys dllCheckPhysDrives = (checkPhys)GetProcAddress(hLib, "CheckPhysDrives");
         if (!dllCheckPhysDrives)
         {
-            std::cout << "Error while getting func address (Phys)" << std::endl; //TODO : ERROR COLOR ??
+            std::cout << "Error while getting func address (Phys)" << std::endl; 
         }
         else
         {
             if (calcAndShowAlldrives(dllCheckPhysDrives) == 0)
             {
                 std::cout << "\n" << "  No drives exist, stopping programm..." << std::endl;
-                std::cin;  //TODO : ERROR COLOR ??
+                std::cin;  
             }
             else
             {
                 checkVol dllCheckVolume = (checkVol)GetProcAddress(hLib, "CheckVolume");
                 if (!dllCheckVolume)
                 {
-                    std::cout << "Error while getting func address (Volumes)"<< std::endl; //TODO : ERROR COLOR ??
+                    std::cout << "Error while getting func address (Volumes)"<< std::endl;
                 }
                 else
                 {   
                     if (calcAndShowAllVolumes(dllCheckVolume) == 0)
                     {
                         std::cout << "\n" << "  No Volumes exist, stopping programm..." << std::endl;
-                        std::cin;  //TODO : ERROR COLOR ??
+                        std::cin;
                     }
                     else
                     {   checkIsNTFS dllcheckIsNTFS = (checkIsNTFS)GetProcAddress(hLib, "checkIsNTFS");
                         if (!dllcheckIsNTFS)
                         {
-                            std::cout << "Error while getting func address (checkIsNTFS)" << std::endl; //TODO : ERROR COLOR ??
+                            std::cout << "Error while getting func address (checkIsNTFS)" << std::endl; 
                         }
                         else
                         {
@@ -132,16 +138,25 @@ int main()
                             while (nTry < maxTry)
                             { 
                                 std::cin >> choosenVolume;
-                                checkResult = false;
-                                checkPointer = false;
-                                checkReading = false;
-                                IsNTFSResult = false;
+                                
                                 dllcheckIsNTFS(checkResult, checkPointer, checkReading, IsNTFSResult, choosenVolume);
                                 if (checkResult == true && checkPointer == true && checkReading == true && IsNTFSResult == true)
                                {
                                   nTry = 3; // Exiting with msg
                                   std::cout << "   All checks done , System is NTFS, searching more info..." << std::endl;
-                                  finalOutput(dllCheckVolume,choosenVolume);
+                                  noMrChcks dllNTFSstruc = (noMrChcks)GetProcAddress(hLib, "noMoreChecks");
+                                  if (!dllNTFSstruc)
+                                  {
+                                      std::cout << "Error while getting func address noMoreChecks" << std::endl;
+                                  }
+                                  else
+                                  {
+                                      NTFS_BootRecordMain _sentStuff;
+                                      std::string fileName = "\\\\.\\";
+                                      std::string fullPath = fileName + choosenVolume + ":";
+                                      dllNTFSstruc(fullPath,_sentStuff);
+                                      finalNTFSOutput(_sentStuff);                                          
+                                  }
                                }
                                 else
                                 {
@@ -190,7 +205,8 @@ int main()
                     }
                 }
             }
-        }
+      
+            FreeLibrary(hLib); }
     }
 }
 
