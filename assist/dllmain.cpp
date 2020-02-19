@@ -19,6 +19,7 @@ BOOL APIENTRY DllMain( HMODULE hModule,
     return TRUE;
 }
 
+//test for branch
 
 std::string byte2ch(BYTE* data, int size)
 {
